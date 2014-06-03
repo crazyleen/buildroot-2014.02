@@ -1,0 +1,13 @@
+#!/bin/sh
+# excute when system init done.
+# this script excute by /etc/init.d/S99done
+#
+
+
+# snapgate global environment
+export status_led='snapgate'
+source /lib/functions/leds.sh
+
+# set led status
+status_led_blink_slow
+

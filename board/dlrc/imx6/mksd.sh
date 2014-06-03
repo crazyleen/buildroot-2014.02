@@ -10,34 +10,33 @@ usage:
 EOF
 }
 
-function format_linux_partition
+format_linux_partition()
 {
     echo "formating android images"
     mkfs.msdos -F 32 ${node}1 -n imx6
     mkfs.ext3 ${node}2 -Lrootfs
     mkfs.ext3 ${node}3 -Loverlay
     mkfs.msdos -F 32 ${node}4 -n SD
+    sync
 }
 
-function flash_linux_image
+flash_linux_image()
 {
     echo "flashing images..."    
-    dd if=u-boot.imx of=${node} bs=1k seek=1
-    #dd if=uImage of=${node} bs=1M seek=1 
+    test -d /media/imx6 && {
+        test -d /media/imx6/boot/ || mkdir /media/imx6/boot
+        cp uImage /media/imx6/boot/ && echo 'flash uImage'
+    }
 
-	mkdir /media/imx6
-	mount ${node}1 /media/imx6 && {
-		cp uImage /media/imx6	
-		umount /media/imx6
-	}
-	rmdir /media/imx6
+    test -d /media/rootfs && {
+        rm -rf /media/rootfs/*
+        tar -xf rootfs.tar.bz2 -C /media/rootfs  && echo 'flash rootfs'
+        chmod 775 /media/rootfs /media/rootfs/*
+    }
 
-	mkdir /media/rootfs
-	mount ${node}2 /media/rootfs && {
-		tar -xf rootfs.tar -C /media/rootfs	
-		umount /media/rootfs
-	}
-	rmdir /media/rootfs
+    dd if=u-boot.imx of=${node} bs=1k seek=1 && echo 'flash u-boot'
+    dd if=uImage of=${node} bs=1M seek=1 
+    sync
 }
 
 node=$1
@@ -59,18 +58,19 @@ if [ ${node} = "/dev/sda" ]; then
 	exit
 fi
 
-umount /media/* 2>/dev/null
-
 test "$2" = "update" && {
 	flash_linux_image 
-	exit
+	exit 0
 }
+
+
+umount /media/* 2>/dev/null
 
 # partition size in MB
 BOOTLOAD_RESERVE=8
 BOOT_ROM_SIZE=64
-ROOTFS_SIZE=512
-OVERLAY_SIZE=512
+ROOTFS_SIZE=1024
+OVERLAY_SIZE=1024
 
 # call sfdisk to create partition table
 # get total card size
@@ -89,7 +89,8 @@ EOF
 
 
 # destroy the partition table
-dd if=/dev/zero of=${node} bs=1M count=1
+dd if=/dev/zero of=${node} bs=1M count=10
+sync 
 
 sfdisk --force -uM ${node} << EOF
 ,${boot_rom_sizeb},c
@@ -107,6 +108,10 @@ sfdisk --force -uM ${node} -N1 << EOF
 ${BOOTLOAD_RESERVE},${BOOT_ROM_SIZE},c
 EOF
 
+sync
 
 format_linux_partition
+echo 'format partitions done'
+echo 'replug SD card to auto mount partitions, press any key to continue'
+read read_TEMP
 flash_linux_image

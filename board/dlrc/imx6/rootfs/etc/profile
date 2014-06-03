@@ -1,0 +1,27 @@
+# ~/.bashrc: executed by bash(1) for non-login interactive shells.
+
+export PATH=\
+/bin:\
+/sbin:\
+/usr/bin:\
+/usr/sbin:
+
+
+export PS1="\u@\h:\w\$"
+export USER=`id -un`
+export LOGNAME=$USER
+export HOSTNAME=`/bin/hostname`
+export HISTSIZE=100
+export HISTFILESIZE=100
+export PAGER='/bin/more '
+export EDITOR='/bin/vi'
+export INPUTRC=/etc/inputrc
+
+# Source configuration files from /etc/profile.d
+for i in /etc/profile.d/*.sh ; do
+    if [ -r "$i" ]; then
+        . $i
+    fi
+done
+                                                                  
+   

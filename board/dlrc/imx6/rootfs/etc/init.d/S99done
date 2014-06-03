@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# system init done
+#
+
+case "$1" in
+  start)
+	# process user commands
+	[ -f /etc/rc.local ] && {
+		sh /etc/rc.local
+	}
+	;;
+esac
+
+exit 0
+

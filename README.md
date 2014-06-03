@@ -1,21 +1,41 @@
 # IMX6 buildroot usage
 
-## How to compile
+### 
 
-### Prepare
+*target*: board/dlrc/imx6/
 
-Prepare download files, copy copy buildroot-dl files to dl manually
+*u-boot*: dl/u-boot-2013.10.tar.bz2
 
-	cp board/dlrc/imx6/tarball/* dl/
+*linux*:  dl/linux-3.0.35-gpu-4.1.0-wand.tar.bz2
 
-or
+## compile
 
-	sh  prepare-tarball.sh
+### using tar file
+
+	tar xf buildroot-2014.02-imx6.tar.bz2 -C /opt/dlrc/
+
+	#copy tar files to dl/
+
+### using git
+
+	cd /opt/dlrc
+
+	git clone https://github.com/crazyleen/buildroot-2014.02.git
+
+	mv buildroot-2014.02 buildroot-2014.02-imx6
+	
+	cd buildroot-2014.02-imx6
+
+	git checkout imx6
+
+	#copy tar files to dl/
 
 ### Compile minimal file system
 
 	make dlrc_imx6_minimal_defconfig
+
 	make
+
 
 ## toolchain usage
 
@@ -23,11 +43,11 @@ Toolchain bin: /opt/dlrc/buildroot-2014.02-imx6/output/host/usr/bin
 
 Target: arm-buildroot-linux-uclibcgnueabi
 
-	source /opt/dlrc/buildroot-2014.02-imx6/envsetup.sh
+set path: source /opt/dlrc/buildroot-2014.02-imx6/envsetup.sh
 
 ## make bootable sd card
 
-### make bootable sd card
+### creat and format partitions, flash images
 
 open a terminal at *output/images*
 
